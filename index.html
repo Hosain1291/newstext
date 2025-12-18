@@ -339,10 +339,11 @@
 ⠀⣯⡺⡅⣀⢀⡀⣀⢀⡀⣀⠀⠀⠀⡸⡼⡙⢵⢳⢅⠀⠀⢺⡪⡗⠀⠀⠀⡰⣝⢞⠌⠑⡯⣺⢄⠀⠀⠀⠀⢈⢎⢎⢜⢌⠢⡁⡂⡐⢀
 ⠀⠱⠝⢮⠳⡝⢮⠳⡝⠮⡳⠀⠀⠀⡵⣫⠃⢸⡹⣕⠀⠀⠵⣝⡎⠀⠀⢠⢯⡺⠅⠀⠀⠸⣕⢗⡄⠀⠀⠀⠐⡕⡕⢕⠜⡌⡢⡂⡪⢐
 ⡤⣠⢄⡤⣠⢄⡤⣠⢄⡤⣠⢄⠀⢨⡺⣕⠁⠀⣝⢮⠄⠀⡹⣪⢎⠀⠀⠋⠓⠉⠀⠀⠀⠀⠊⠋⠚⠀⠀⠀⠨⡪⡪⡪⡪⡪⢢⠣⡊⡆
-⠝⠎⢷⢝⡮⠳⠹⢪⢗⡝⠎⠏⠀⢜⡞⡖⠀⠀⢱⡫⣇⠀⡪⣗⢇⠀⡤⡤⡤⡤⡤⡤⡤⡤⡤⡤⡤⡤⠀⠀⠨⡪⡪⡪⡪⡪⡪⡪⡪⡪
+⠝⠎⢷⢝⡮⠳⠹⢪⢗⡝⠎⠏⠀⢜⡞⡖⠀⠀⢱⡫⣇⠀⡪⣗⢇⠀⡤⡤⡤⡤⡤⡤⡤⡤⡤⡤⡤⡤⠀⠀⠨⡪⡪⡪⡪⡪⡪⡪⡪
 ⠀⠀⡳⣝⡆⠀⠀⢪⢯⢎⠀⠀⠀⠓⠙⠂⠀⠀⠘⠚⠊⠀⠜⠮⠇⠀⠙⠊⠋⠋⠚⠙⠙⠊⠋⠋⠚⠙⠀⠀⠈⠊⠊⠊⠊⠊⠊⠊⠊⠊
 `;
 
+    // 109번 태블릿/IT 추가됨
     const NEWS_CATS = {
         101: { t: "주요뉴스", u: "https://www.newsis.com/RSS/sokbo.xml" },
         102: { t: "정치",  u: "https://www.newsis.com/RSS/politics.xml" },
@@ -351,7 +352,8 @@
         105: { t: "국제",     u: "https://www.newsis.com/RSS/international.xml" },
         106: { t: "문화",   u: "https://www.newsis.com/RSS/culture.xml" },
         107: { t: "스포츠",    u: "https://www.newsis.com/RSS/sports.xml" },
-        108: { t: "연예", u: "https://www.newsis.com/RSS/entertain.xml" }
+        108: { t: "연예", u: "https://www.newsis.com/RSS/entertain.xml" },
+        109: { t: "태블릿/IT", u: "https://www.newsis.com/RSS/industry.xml" } 
     };
 
     // 전국 80개 도시 이름 (기상청 XML 관측소 이름 기준)
@@ -492,11 +494,12 @@
                 <div class="tele-item" onclick="loadPage(104)"><span class="ti-id">104</span><span class="ti-text">사회 뉴스</span></div>
             </div>
             <div>
-                <div class="c-c bg-t" style="margin-bottom: 5px; font-size: 1.1rem;">추가 정보 (105-108)</div>
+                <div class="c-c bg-t" style="margin-bottom: 5px; font-size: 1.1rem;">추가 정보 (105-109)</div>
                 <div class="tele-item" onclick="loadPage(105)"><span class="ti-id">105</span><span class="ti-text">국제 뉴스</span></div>
                 <div class="tele-item" onclick="loadPage(106)"><span class="ti-id">106</span><span class="ti-text">문화/예술</span></div>
                 <div class="tele-item" onclick="loadPage(107)"><span class="ti-id">107</span><span class="ti-text">스포츠</span></div>
                 <div class="tele-item" onclick="loadPage(108)"><span class="ti-id">108</span><span class="ti-text">연예/방송</span></div>
+                <div class="tele-item" onclick="loadPage(109)"><span class="ti-id">109</span><span class="ti-text">태블릿/IT</span></div>
             </div>
         </div>
 
@@ -558,7 +561,7 @@
         return { map: kmaMap, time: timeStr };
     }
 
-    // --- P101~108: 뉴스 (XML 직접 파싱) ---
+    // --- P101~109: 뉴스 (XML 직접 파싱) ---
     async function fetchNews(page) {
         const cat = NEWS_CATS[page];
         
@@ -617,9 +620,10 @@
             contentDiv.innerHTML = html;
             updateFastext("목차", "다음분야", "날씨", "내위치");
             
+            // fastextBar[1]: 다음 분야로 이동 (순환 로직 수정: 109까지)
             fastextBar[1].onclick = () => {
                 let next = page + 1;
-                if(next > 108) next = 101;
+                if(next > 109) next = 101;
                 loadPage(next);
             };
 

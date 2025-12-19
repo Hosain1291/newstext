@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NewsText</title>
+    <title>/N / e / w / s/ Text</title>
     <style>
         /* 1. 폰트: 둥근모 */
         @font-face {
@@ -171,7 +171,8 @@
         <!-- 하단 명령줄 -->
         <div id="command-line">
             <span id="prompt-text">선택(번호) ></span>
-            <input type="text" id="cmd-input" maxlength="10" autocomplete="off" inputmode="numeric">
+            <!-- inputmode="numeric" 제거: 일반 키보드 사용 -->
+            <input type="text" id="cmd-input" maxlength="10" autocomplete="off">
             <span class="cursor"></span>
         </div>
     </div>
@@ -188,9 +189,9 @@
         "https://api.allorigins.win/raw?url="
     ];
 
-    // 뉴스 카테고리 (수정됨)
+    // 뉴스 카테고리
     const NEWS_CATS = {
-        // [뉴시스] 10번대 (유지)
+        // [뉴시스] 10번대
         11: { t: "뉴시스 속보", u: "https://www.newsis.com/RSS/sokbo.xml" },
         12: { t: "뉴시스 정치", u: "https://www.newsis.com/RSS/politics.xml" },
         13: { t: "뉴시스 경제", u: "https://www.newsis.com/RSS/economy.xml" },
@@ -201,7 +202,7 @@
         18: { t: "뉴시스 문화", u: "https://www.newsis.com/RSS/culture.xml" },
         19: { t: "뉴시스 스포츠", u: "https://www.newsis.com/RSS/sports.xml" },
         
-        // [연합뉴스] 20번대 (30번대에서 이동)
+        // [연합뉴스] 20번대
         21: { t: "연합 전체기사", u: "https://www.yna.co.kr/rss/news.xml" },
         22: { t: "연합 정치", u: "https://www.yna.co.kr/rss/politics.xml" },
         23: { t: "연합 경제", u: "https://www.yna.co.kr/rss/economy.xml" },
@@ -211,10 +212,9 @@
         27: { t: "연합 국제", u: "https://www.yna.co.kr/rss/international.xml" },
         28: { t: "연합 문화", u: "https://www.yna.co.kr/rss/culture.xml" },
         29: { t: "연합 스포츠", u: "https://www.yna.co.kr/rss/sports.xml" }
-        
     };
 
-    // 기상청 관측소 지역별 분류 (30번대로 이동 및 세분화)
+    // 기상청 관측소 지역별 분류 (메뉴용)
     const REGION_CITIES = {
         // 수도권
         32: { name: "서울/경기/인천", cities: ["서울", "인천", "수원", "파주", "동두천", "이천", "백령도", "강화", "양평"] },
@@ -263,7 +263,6 @@
         // 페이지 분기
         if(pageNo === 100) renderMainMenu();
         else if(NEWS_CATS[pageNo]) fetchNewsList(pageNo);
-        // 30: 날씨 홈, 31: 내 위치, 32~37: 지역별
         else if(pageNo === 30) renderWeatherMenu(); 
         else if(pageNo === 31) fetchLocalWeather(); 
         else if(pageNo >= 32 && pageNo <= 37) fetchRegionalWeather(pageNo);
@@ -287,7 +286,7 @@
 <span class="c-c">│</span>                                                  <span class="c-c">│</span>
 <span class="c-c">│</span>  <span class="c-w">[ 날씨 Weather ]</span>                                <span class="c-c">│</span>
 <span class="c-c">│</span>   30. 날씨 홈 (지역별 상세 조회)                 <span class="c-c">│</span>
-<span class="c-c">│</span>   31. <span class="c-y">내 위치 날씨</span>                               <span class="c-c">│</span>
+<span class="c-c">│</span>   31. <span class="c-y">내 위치 날씨</span>                                 <span class="c-c">│</span>
 <span class="c-c">│</span>                                                  <span class="c-c">│</span>
 <span class="c-c">│</span>   99. 도움말              X.  접속 종료          <span class="c-c">│</span>
 <span class="c-c">└──────────────────────────────────────────────────┘</span>
@@ -327,7 +326,7 @@
                     desc: node.querySelector("description")?.textContent || "",
                     date: node.querySelector("pubDate")?.textContent || "",
                     link: node.querySelector("link")?.textContent || "",
-                    isYonhap: (catId >= 20 && catId < 30) // 20번대 연합뉴스
+                    isYonhap: (catId >= 20 && catId < 30)
                 });
             });
 
@@ -401,7 +400,6 @@
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(html, "text/html");
                             
-                            // 연합뉴스 본문 셀렉터
                             const article = doc.querySelector('.story-news') || doc.querySelector('#articleWrap') || doc.querySelector('.article-story');
                             if(article) { fullText = article.innerText; fetched = true; }
                             
@@ -420,7 +418,7 @@
         }
     }
 
-    // --- 기상청 데이터 파싱 공통 함수 ---
+    // --- 기상청 데이터 파싱 ---
     async function getKmaData() {
         const url = "https://www.kma.go.kr/XML/weather/sfc_web_map.xml";
         let xmlText = null;
@@ -479,7 +477,6 @@
             let output = `<span class="c-y">■ ${regionInfo.name} 지역 날씨 ■</span>\n`;
             output += `<span class="c-g">발표: ${data.year}.${data.month}.${data.day} ${data.hour}시</span>\n\n`;
             
-            // 2열 그리드
             output += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">`;
             
             regionInfo.cities.forEach(city => {
@@ -521,20 +518,51 @@
                 const data = await getKmaData();
                 const items = data.locals;
                 
-                // 좌표가 있는 기존 CITIES 배열 활용 (검색용)
-                const COORD_CITIES = [
+                // 검색 대상 도시 전체 목록 (좌표 포함)
+                // REGION_CITIES에 있는 거의 모든 관측소 좌표 등록
+                const ALL_COORD_CITIES = [
+                    // 서울/경기/인천
                     {n:"서울",la:37.57,lo:126.97}, {n:"인천",la:37.48,lo:126.62}, {n:"수원",la:37.26,lo:126.98},
-                    {n:"춘천",la:37.90,lo:127.74}, {n:"강릉",la:37.75,lo:128.89}, {n:"대전",la:36.37,lo:127.37},
-                    {n:"청주",la:36.64,lo:127.44}, {n:"대구",la:35.88,lo:128.62}, {n:"부산",la:35.10,lo:129.03},
-                    {n:"울산",la:35.56,lo:129.31}, {n:"광주",la:35.17,lo:126.85}, {n:"전주",la:35.84,lo:127.13},
-                    {n:"제주",la:33.51,lo:126.52}, {n:"서귀포",la:33.25,lo:126.56}, {n:"목포",la:34.81,lo:126.39},
-                    {n:"여수",la:34.76,lo:127.66}, {n:"안동",la:36.56,lo:128.72}, {n:"포항",la:36.01,lo:129.37}
+                    {n:"파주",la:37.88,lo:126.78}, {n:"동두천",la:37.90,lo:127.06}, {n:"이천",la:37.28,lo:127.44},
+                    {n:"백령도",la:37.97,lo:124.63}, {n:"강화",la:37.75,lo:126.48}, {n:"양평",la:37.49,lo:127.49},
+                    // 강원
+                    {n:"춘천",la:37.90,lo:127.74}, {n:"강릉",la:37.75,lo:128.89}, {n:"속초",la:38.21,lo:128.56},
+                    {n:"철원",la:38.15,lo:127.30}, {n:"대관령",la:37.68,lo:128.76}, {n:"원주",la:37.34,lo:127.95},
+                    {n:"영월",la:37.18,lo:128.46}, {n:"태백",la:37.17,lo:128.99}, {n:"인제",la:38.06,lo:128.17},
+                    {n:"홍천",la:37.68,lo:127.88}, {n:"동해",la:37.52,lo:129.11}, {n:"정선군",la:37.38,lo:128.66},
+                    // 충청
+                    {n:"대전",la:36.37,lo:127.37}, {n:"세종",la:36.48,lo:127.29}, {n:"청주",la:36.64,lo:127.44},
+                    {n:"충주",la:36.97,lo:127.95}, {n:"추풍령",la:36.22,lo:127.99}, {n:"서산",la:36.77,lo:126.49},
+                    {n:"천안",la:36.81,lo:127.11}, {n:"보령",la:36.33,lo:126.56}, {n:"부여",la:36.27,lo:126.91},
+                    {n:"금산",la:36.11,lo:127.48}, {n:"홍성",la:36.60,lo:126.66}, {n:"제천",la:37.13,lo:128.19},
+                    {n:"보은",la:36.49,lo:127.73},
+                    // 전라
+                    {n:"광주",la:35.17,lo:126.85}, {n:"전주",la:35.84,lo:127.13}, {n:"목포",la:34.81,lo:126.39},
+                    {n:"여수",la:34.76,lo:127.66}, {n:"군산",la:35.99,lo:126.72}, {n:"완도",la:34.31,lo:126.71},
+                    {n:"고창",la:35.43,lo:126.69}, {n:"순천",la:35.03,lo:127.38}, {n:"진도(첨찰산)",la:34.47,lo:126.26},
+                    {n:"흑산도",la:34.68,lo:125.43}, {n:"정읍",la:35.56,lo:126.85}, {n:"남원",la:35.42,lo:127.39},
+                    {n:"임실",la:35.61,lo:127.28}, {n:"장흥",la:34.68,lo:126.92}, {n:"해남",la:34.55,lo:126.57},
+                    {n:"고흥",la:34.61,lo:127.28},
+                    // 경상
+                    {n:"부산",la:35.10,lo:129.03}, {n:"대구",la:35.88,lo:128.62}, {n:"울산",la:35.56,lo:129.31},
+                    {n:"창원",la:35.23,lo:128.68}, {n:"안동",la:36.56,lo:128.72}, {n:"포항",la:36.03,lo:129.38},
+                    {n:"상주",la:36.41,lo:128.16}, {n:"진주",la:35.19,lo:128.08}, {n:"거창",la:35.67,lo:127.91},
+                    {n:"통영",la:34.85,lo:128.43}, {n:"울릉도",la:37.48,lo:130.91}, {n:"김해시",la:35.22,lo:128.89},
+                    {n:"경주시",la:35.83,lo:129.20}, {n:"영천",la:35.97,lo:128.94}, {n:"영덕",la:36.40,lo:129.36},
+                    {n:"의성",la:36.35,lo:128.69}, {n:"봉화",la:36.89,lo:128.73}, {n:"영주",la:36.87,lo:128.51},
+                    {n:"문경",la:36.62,lo:128.14}, {n:"합천",la:35.57,lo:128.17}, {n:"밀양",la:35.49,lo:128.74},
+                    {n:"산청",la:35.41,lo:127.87}, {n:"남해",la:34.82,lo:127.92}, {n:"거제",la:34.88,lo:128.62},
+                    {n:"청송군",la:36.43,lo:129.05},
+                    // 제주
+                    {n:"제주",la:33.51,lo:126.52}, {n:"서귀포",la:33.25,lo:126.56}, {n:"성산",la:33.39,lo:126.88},
+                    {n:"고산",la:33.29,lo:126.16}
                 ];
 
                 let nearest = null;
                 let minDist = Infinity;
                 
-                COORD_CITIES.forEach(city => {
+                // 전체 관측소 중 가장 가까운 곳 탐색
+                ALL_COORD_CITIES.forEach(city => {
                     const dist = Math.pow(city.la - lat, 2) + Math.pow(city.lo - lon, 2);
                     if(dist < minDist) {
                         minDist = dist;

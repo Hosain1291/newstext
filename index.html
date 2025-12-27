@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>/N / e / w / s/ Text</title>
+    <title>/N/e/w/s/ BBS</title>
     <style>
         /* 1. 폰트: 둥근모 */
         @font-face {
@@ -31,7 +31,7 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--bg-color); /* 전체 배경 파란색 */
+            background-color: var(--bg-color);
             font-family: 'DungGeunMo', monospace;
             overflow: hidden;
             color: var(--text-main);
@@ -141,15 +141,6 @@
             color: var(--text-yellow);
             background-color: #000080;
         }
-
-        /* 반응형 */
-        @media (max-width: 768px) {
-            #main-view { padding: 10px; font-size: 16px; }
-            #command-line { font-size: 16px; padding: 8px 10px; }
-            #cmd-input { font-size: 16px; }
-            #status-bar { font-size: 12px; }
-            .t-link { padding: 8px 0; border-bottom: 1px dashed #000080; }
-        }
     </style>
 </head>
 <body>
@@ -158,7 +149,7 @@
     <div id="screen">
         <!-- 상단 상태바 -->
         <div id="status-bar">
-            <span>/N / e / w / s/ Text</span>
+            <span>/N/e/w/s/ BBS</span>
             <span id="clock">00:00:00</span>
             <span>Online</span>
         </div>
@@ -171,7 +162,6 @@
         <!-- 하단 명령줄 -->
         <div id="command-line">
             <span id="prompt-text">선택(번호) ></span>
-            <!-- inputmode="numeric" 제거: 일반 키보드 사용 -->
             <input type="text" id="cmd-input" maxlength="10" autocomplete="off">
             <span class="cursor"></span>
         </div>
@@ -214,20 +204,51 @@
         29: { t: "연합 스포츠", u: "https://www.yna.co.kr/rss/sports.xml" }
     };
 
-    // 기상청 관측소 지역별 분류 (메뉴용)
-    const REGION_CITIES = {
-        // 수도권
-        32: { name: "서울/경기/인천", cities: ["서울", "인천", "수원", "파주", "동두천", "이천", "백령도", "강화", "양평"] },
-        // 강원도
-        33: { name: "강원도", cities: ["춘천", "강릉", "속초", "철원", "대관령", "원주", "영월", "태백", "인제", "홍천", "동해", "정선군"] },
-        // 충청권
-        34: { name: "충청/대전/세종", cities: ["대전", "세종", "청주", "충주", "추풍령", "서산", "천안", "보령", "부여", "금산", "홍성", "제천", "보은"] },
-        // 전라권
-        35: { name: "전라/광주", cities: ["광주", "전주", "목포", "여수", "군산", "완도", "고창", "순천", "진도(첨찰산)", "흑산도", "정읍", "남원", "임실", "장흥", "해남", "고흥"] },
-        // 경상권
-        36: { name: "경상/대구/부산/울산", cities: ["부산", "대구", "울산", "창원", "안동", "포항", "상주", "진주", "거창", "통영", "울릉도", "김해시", "경주시", "영천", "영덕", "의성", "봉화", "영주", "문경", "합천", "밀양", "산청", "남해", "거제", "청송군"] },
-        // 제주도
-        37: { name: "제주도", cities: ["제주", "서귀포", "성산", "고산"] }
+    // [전국 상세 시/군/구 좌표 데이터] - 김천 포함 80여곳
+    // Open-Meteo는 좌표 기반이므로 이름과 좌표 매핑이 중요
+    const KOREA_CITIES = {
+        // 수도권 (서울/인천/경기) - 32
+        "서울": {la:37.57, lo:126.97, reg: 32}, "인천": {la:37.48, lo:126.62, reg: 32}, "수원": {la:37.26, lo:126.98, reg: 32},
+        "파주": {la:37.88, lo:126.78, reg: 32}, "동두천": {la:37.90, lo:127.06, reg: 32}, "이천": {la:37.28, lo:127.44, reg: 32},
+        "백령도": {la:37.97, lo:124.63, reg: 32}, "강화": {la:37.75, lo:126.48, reg: 32}, "양평": {la:37.49, lo:127.49, reg: 32},
+        "성남": {la:37.44, lo:127.14, reg: 32}, "의정부": {la:37.74, lo:127.03, reg: 32}, "평택": {la:37.00, lo:127.11, reg: 32},
+        
+        // 강원도 - 33
+        "춘천": {la:37.90, lo:127.74, reg: 33}, "강릉": {la:37.75, lo:128.89, reg: 33}, "속초": {la:38.21, lo:128.56, reg: 33},
+        "철원": {la:38.15, lo:127.30, reg: 33}, "대관령": {la:37.68, lo:128.76, reg: 33}, "원주": {la:37.34, lo:127.95, reg: 33},
+        "영월": {la:37.18, lo:128.46, reg: 33}, "태백": {la:37.17, lo:128.99, reg: 33}, "인제": {la:38.06, lo:128.17, reg: 33},
+        "홍천": {la:37.68, lo:127.88, reg: 33}, "동해": {la:37.52, lo:129.11, reg: 33}, "정선": {la:37.38, lo:128.66, reg: 33},
+        
+        // 충청권 (대전/세종/충남/충북) - 34
+        "대전": {la:36.37, lo:127.37, reg: 34}, "세종": {la:36.48, lo:127.29, reg: 34}, "청주": {la:36.64, lo:127.44, reg: 34},
+        "충주": {la:36.97, lo:127.95, reg: 34}, "추풍령": {la:36.22, lo:127.99, reg: 34}, "서산": {la:36.77, lo:126.49, reg: 34},
+        "천안": {la:36.81, lo:127.11, reg: 34}, "보령": {la:36.33, lo:126.56, reg: 34}, "부여": {la:36.27, lo:126.91, reg: 34},
+        "금산": {la:36.11, lo:127.48, reg: 34}, "홍성": {la:36.60, lo:126.66, reg: 34}, "제천": {la:37.13, lo:128.19, reg: 34},
+        "보은": {la:36.49, lo:127.73, reg: 34}, "공주": {la:36.45, lo:127.12, reg: 34}, "논산": {la:36.20, lo:127.09, reg: 34},
+
+        // 전라권 (광주/전남/전북) - 35
+        "광주": {la:35.17, lo:126.85, reg: 35}, "전주": {la:35.84, lo:127.13, reg: 35}, "목포": {la:34.81, lo:126.39, reg: 35},
+        "여수": {la:34.76, lo:127.66, reg: 35}, "군산": {la:35.99, lo:126.72, reg: 35}, "완도": {la:34.31, lo:126.71, reg: 35},
+        "고창": {la:35.43, lo:126.69, reg: 35}, "순천": {la:35.03, lo:127.38, reg: 35}, "진도": {la:34.47, lo:126.26, reg: 35},
+        "흑산도": {la:34.68, lo:125.43, reg: 35}, "정읍": {la:35.56, lo:126.85, reg: 35}, "남원": {la:35.42, lo:127.39, reg: 35},
+        "임실": {la:35.61, lo:127.28, reg: 35}, "장흥": {la:34.68, lo:126.92, reg: 35}, "해남": {la:34.55, lo:126.57, reg: 35},
+        "고흥": {la:34.61, lo:127.28, reg: 35}, "나주": {la:35.01, lo:126.71, reg: 35}, "광양": {la:34.94, lo:127.70, reg: 35},
+
+        // 경상권 (부산/대구/울산/경남/경북) - 36
+        "부산": {la:35.10, lo:129.03, reg: 36}, "대구": {la:35.88, lo:128.62, reg: 36}, "울산": {la:35.56, lo:129.31, reg: 36},
+        "창원": {la:35.23, lo:128.68, reg: 36}, "안동": {la:36.56, lo:128.72, reg: 36}, "포항": {la:36.03, lo:129.38, reg: 36},
+        "상주": {la:36.41, lo:128.16, reg: 36}, "진주": {la:35.19, lo:128.08, reg: 36}, "거창": {la:35.67, lo:127.91, reg: 36},
+        "통영": {la:34.85, lo:128.43, reg: 36}, "울릉도": {la:37.48, lo:130.91, reg: 36}, "김해": {la:35.22, lo:128.89, reg: 36},
+        "경주": {la:35.83, lo:129.20, reg: 36}, "영천": {la:35.97, lo:128.94, reg: 36}, "영덕": {la:36.40, lo:129.36, reg: 36},
+        "의성": {la:36.35, lo:128.69, reg: 36}, "봉화": {la:36.89, lo:128.73, reg: 36}, "영주": {la:36.87, lo:128.51, reg: 36},
+        "문경": {la:36.62, lo:128.14, reg: 36}, "합천": {la:35.57, lo:128.17, reg: 36}, "밀양": {la:35.49, lo:128.74, reg: 36},
+        "산청": {la:35.41, lo:127.87, reg: 36}, "남해": {la:34.82, lo:127.92, reg: 36}, "거제": {la:34.88, lo:128.62, reg: 36},
+        "청송": {la:36.43, lo:129.05, reg: 36}, "김천": {la:36.14, lo:128.11, reg: 36}, "구미": {la:36.11, lo:128.33, reg: 36},
+        "독도": {la:37.24, lo:131.86, reg: 36},
+
+        // 제주권 - 37
+        "제주": {la:33.51, lo:126.52, reg: 37}, "서귀포": {la:33.25, lo:126.56, reg: 37}, "성산": {la:33.39, lo:126.88, reg: 37},
+        "고산": {la:33.29, lo:126.16, reg: 37}
     };
 
     // DOM 요소
@@ -263,9 +284,9 @@
         // 페이지 분기
         if(pageNo === 100) renderMainMenu();
         else if(NEWS_CATS[pageNo]) fetchNewsList(pageNo);
-        else if(pageNo === 30) renderWeatherMenu(); 
-        else if(pageNo === 31) fetchLocalWeather(); 
-        else if(pageNo >= 32 && pageNo <= 37) fetchRegionalWeather(pageNo);
+        else if(pageNo === 30) renderWeatherRegionMenu(); // 30: 권역 선택 메뉴
+        else if(pageNo === 31) fetchLocalWeather(); // 31: 내 위치 (김천 포함)
+        else if(pageNo >= 32 && pageNo <= 37) fetchRegionalWeather(pageNo); // 권역별 상세
         else if(pageNo === 99) renderHelp();
         else renderError("존재하지 않는 페이지입니다.");
     }
@@ -284,9 +305,9 @@
 <span class="c-c">│</span>   21.전체 22.정치 23.경제 24.산업 25.사회        <span class="c-c">│</span>
 <span class="c-c">│</span>   26.전국 27.국제 28.문화 29.스포츠              <span class="c-c">│</span>
 <span class="c-c">│</span>                                                  <span class="c-c">│</span>
-<span class="c-c">│</span>  <span class="c-w">[ 날씨 Weather ]</span>                                <span class="c-c">│</span>
-<span class="c-c">│</span>   30. 날씨 홈 (지역별 상세 조회)                 <span class="c-c">│</span>
-<span class="c-c">│</span>   31. <span class="c-y">내 위치 날씨</span>                               <span class="c-c">│</span>
+<span class="c-c">│</span>  <span class="c-w">[ 날씨 Weather (Open-Meteo) ]</span>                   <span class="c-c">│</span>
+<span class="c-c">│</span>   30. <span class="c-y">전국/권역별 날씨</span> (시/군/구)                <span class="c-c">│</span>
+<span class="c-c">│</span>   31. 내 위치 날씨 (GPS 정밀)                    <span class="c-c">│</span>
 <span class="c-c">│</span>                                                  <span class="c-c">│</span>
 <span class="c-c">│</span>   99. 도움말              X.  접속 종료          <span class="c-c">│</span>
 <span class="c-c">└──────────────────────────────────────────────────┘</span>
@@ -418,90 +439,98 @@
         }
     }
 
-    // --- 기상청 데이터 파싱 ---
-    async function getKmaData() {
-        const url = "https://www.kma.go.kr/XML/weather/sfc_web_map.xml";
-        let xmlText = null;
-        for (const proxy of PROXIES) {
-            try {
-                const res = await fetch(proxy + encodeURIComponent(url));
-                if (res.ok) { xmlText = await res.text(); break; }
-            } catch (e) {}
-        }
-        if(!xmlText) throw new Error("Weather Load Failed");
-        
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(xmlText, "text/xml");
-        return {
-            year: xml.querySelector("weather").getAttribute("year"),
-            month: xml.querySelector("weather").getAttribute("month"),
-            day: xml.querySelector("weather").getAttribute("day"),
-            hour: xml.querySelector("weather").getAttribute("hour"),
-            locals: xml.querySelectorAll("local")
-        };
+    // --- Open-Meteo API 날씨 가져오기 ---
+    async function getOpenMeteoData(lat, lon) {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("API Call Failed");
+        const json = await res.json();
+        return json.current_weather; 
     }
 
-    // --- 날씨 메인 (30번) ---
-    function renderWeatherMenu() {
+    // WMO 날씨 코드 변환
+    function getWeatherDesc(code) {
+        if (code === 0) return "맑음";
+        if (code >= 1 && code <= 3) return "구름";
+        if (code >= 45 && code <= 48) return "안개";
+        if (code >= 51 && code <= 67) return "비";
+        if (code >= 71 && code <= 77) return "눈";
+        if (code >= 80 && code <= 82) return "소나기";
+        if (code >= 95 && code <= 99) return "뇌우";
+        return "정보없음";
+    }
+
+    // --- 30번: 권역 선택 메뉴 (시도별 요약) ---
+    function renderWeatherRegionMenu() {
         const art = `
-<span class="c-y">■ 날씨 정보 서비스 ■</span>
+<span class="c-y">■ 전국 권역별 날씨 ■</span>
 
- 31. <span class="c-g">내 위치 날씨 확인 (GPS)</span>
-
- [지역별 상세 날씨 (시/군/구)]
+ [지역 선택]
  --------------------------------------
- <span class="t-link" onclick="loadPage(32)">32. 서울 / 경기 / 인천</span>
+ <span class="t-link" onclick="loadPage(32)">32. 수도권 (서울/인천/경기)</span>
  <span class="t-link" onclick="loadPage(33)">33. 강원도 (영서/영동)</span>
- <span class="t-link" onclick="loadPage(34)">34. 충청 / 대전 / 세종</span>
- <span class="t-link" onclick="loadPage(35)">35. 전라 / 광주</span>
- <span class="t-link" onclick="loadPage(36)">36. 경상 / 대구 / 부산 / 울산</span>
+ <span class="t-link" onclick="loadPage(34)">34. 충청권 (대전/세종/충남/충북)</span>
+ <span class="t-link" onclick="loadPage(35)">35. 전라권 (광주/전남/전북)</span>
+ <span class="t-link" onclick="loadPage(36)">36. 경상권 (부산/대구/울산/경남/경북)</span>
  <span class="t-link" onclick="loadPage(37)">37. 제주도</span>
  --------------------------------------
+ * 원하는 권역 번호를 선택하면 
+   해당 지역의 상세 시/군/구 날씨를 볼 수 있습니다.
 
-<span class="c-w">[M] 메인 메뉴로 돌아가기</span>
+<span class="c-w">[31:내위치] [M:메인]</span>
 `;
         mainView.innerHTML = art;
         promptText.innerText = "선택(번호) >";
     }
 
-    // --- 지역별 상세 날씨 (32~37번) ---
+    // --- 지역별 상세 날씨 (시/군/구 전체) ---
     async function fetchRegionalWeather(pageNo) {
         renderLoading();
         try {
-            const data = await getKmaData();
-            const items = data.locals;
-            const regionInfo = REGION_CITIES[pageNo];
+            // 해당 권역(reg)에 해당하는 도시들만 필터링
+            const targetCities = Object.entries(KOREA_CITIES).filter(([name, data]) => data.reg === pageNo);
             
-            if(!regionInfo) { renderError("지역 정보 오류"); return; }
+            if(targetCities.length === 0) { renderError("지역 정보 오류"); return; }
 
-            let output = `<span class="c-y">■ ${regionInfo.name} 지역 날씨 ■</span>\n`;
-            output += `<span class="c-g">발표: ${data.year}.${data.month}.${data.day} ${data.hour}시</span>\n\n`;
+            // 권역 이름 찾기 (하드코딩 대신 맵핑)
+            const regionNames = {32:"수도권", 33:"강원도", 34:"충청권", 35:"전라권", 36:"경상권", 37:"제주도"};
             
+            let output = `<span class="c-y">■ ${regionNames[pageNo]} 상세 날씨 ■</span>\n`;
+            output += `<span class="c-g">Data: Open-Meteo</span>\n\n`;
             output += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">`;
             
-            regionInfo.cities.forEach(city => {
-                let info = { temp: "--", desc: "정보없음" };
-                for(let i=0; i<items.length; i++) {
-                    if(items[i].textContent === city) {
-                        info.temp = items[i].getAttribute("ta");
-                        info.desc = items[i].getAttribute("desc");
-                        break;
-                    }
+            // 병렬 요청
+            const promises = targetCities.map(async ([name, coords]) => {
+                try {
+                    const data = await getOpenMeteoData(coords.la, coords.lo);
+                    return { 
+                        name: name, 
+                        temp: data.temperature, 
+                        desc: getWeatherDesc(data.weathercode) 
+                    };
+                } catch(e) {
+                    return { name: name, temp: "Err", desc: "-" };
                 }
-                output += `<div><span class="c-c">${city}</span> <span class="c-w">${info.desc}</span> <span class="c-r">${info.temp}℃</span></div>`;
             });
-            output += `</div>`;
+
+            const results = await Promise.all(promises);
+
+            results.forEach(item => {
+                output += `<div><span class="c-c">[${item.name}]</span> <span class="c-w">${item.desc}</span> <span class="c-r">${item.temp}℃</span></div>`;
+            });
             
-            output += `\n<span class="c-g">[30:날씨홈] [M:메인]</span>`;
+            output += `</div>`;
+            output += `\n<span class="c-w">[30:권역목록] [M:메인]</span>`;
             
             mainView.innerHTML = output;
-            promptText.innerText = "명령(30/M) >";
+            promptText.innerText = "명령(M) >";
+            currentPage = pageNo; // 새로고침 용
         } catch(e) {
             renderError("날씨 정보 수신 실패");
         }
     }
 
-    // --- 내 위치 날씨 (31) ---
+    // --- 31번: 내 위치 날씨 (정밀 GPS - 김천 등 전국 매칭) ---
     function fetchLocalWeather() {
         if(!navigator.geolocation) {
             renderError("브라우저가 위치 정보를 지원하지 않습니다.");
@@ -515,88 +544,58 @@
             const lon = pos.coords.longitude;
             
             try {
-                const data = await getKmaData();
-                const items = data.locals;
+                // 1. 날씨 데이터
+                const weather = await getOpenMeteoData(lat, lon);
                 
-                // 검색 대상 도시 전체 목록 (좌표 포함)
-                // REGION_CITIES에 있는 거의 모든 관측소 좌표 등록
-                const ALL_COORD_CITIES = [
-                    // 서울/경기/인천
-                    {n:"서울",la:37.57,lo:126.97}, {n:"인천",la:37.48,lo:126.62}, {n:"수원",la:37.26,lo:126.98},
-                    {n:"파주",la:37.88,lo:126.78}, {n:"동두천",la:37.90,lo:127.06}, {n:"이천",la:37.28,lo:127.44},
-                    {n:"백령도",la:37.97,lo:124.63}, {n:"강화",la:37.75,lo:126.48}, {n:"양평",la:37.49,lo:127.49},
-                    // 강원
-                    {n:"춘천",la:37.90,lo:127.74}, {n:"강릉",la:37.75,lo:128.89}, {n:"속초",la:38.21,lo:128.56},
-                    {n:"철원",la:38.15,lo:127.30}, {n:"대관령",la:37.68,lo:128.76}, {n:"원주",la:37.34,lo:127.95},
-                    {n:"영월",la:37.18,lo:128.46}, {n:"태백",la:37.17,lo:128.99}, {n:"인제",la:38.06,lo:128.17},
-                    {n:"홍천",la:37.68,lo:127.88}, {n:"동해",la:37.52,lo:129.11}, {n:"정선군",la:37.38,lo:128.66},
-                    // 충청
-                    {n:"대전",la:36.37,lo:127.37}, {n:"세종",la:36.48,lo:127.29}, {n:"청주",la:36.64,lo:127.44},
-                    {n:"충주",la:36.97,lo:127.95}, {n:"추풍령",la:36.22,lo:127.99}, {n:"서산",la:36.77,lo:126.49},
-                    {n:"천안",la:36.81,lo:127.11}, {n:"보령",la:36.33,lo:126.56}, {n:"부여",la:36.27,lo:126.91},
-                    {n:"금산",la:36.11,lo:127.48}, {n:"홍성",la:36.60,lo:126.66}, {n:"제천",la:37.13,lo:128.19},
-                    {n:"보은",la:36.49,lo:127.73},
-                    // 전라
-                    {n:"광주",la:35.17,lo:126.85}, {n:"전주",la:35.84,lo:127.13}, {n:"목포",la:34.81,lo:126.39},
-                    {n:"여수",la:34.76,lo:127.66}, {n:"군산",la:35.99,lo:126.72}, {n:"완도",la:34.31,lo:126.71},
-                    {n:"고창",la:35.43,lo:126.69}, {n:"순천",la:35.03,lo:127.38}, {n:"진도(첨찰산)",la:34.47,lo:126.26},
-                    {n:"흑산도",la:34.68,lo:125.43}, {n:"정읍",la:35.56,lo:126.85}, {n:"남원",la:35.42,lo:127.39},
-                    {n:"임실",la:35.61,lo:127.28}, {n:"장흥",la:34.68,lo:126.92}, {n:"해남",la:34.55,lo:126.57},
-                    {n:"고흥",la:34.61,lo:127.28},
-                    // 경상
-                    {n:"부산",la:35.10,lo:129.03}, {n:"대구",la:35.88,lo:128.62}, {n:"울산",la:35.56,lo:129.31},
-                    {n:"창원",la:35.23,lo:128.68}, {n:"안동",la:36.56,lo:128.72}, {n:"포항",la:36.03,lo:129.38},
-                    {n:"상주",la:36.41,lo:128.16}, {n:"진주",la:35.19,lo:128.08}, {n:"거창",la:35.67,lo:127.91},
-                    {n:"통영",la:34.85,lo:128.43}, {n:"울릉도",la:37.48,lo:130.91}, {n:"김해시",la:35.22,lo:128.89},
-                    {n:"경주시",la:35.83,lo:129.20}, {n:"영천",la:35.97,lo:128.94}, {n:"영덕",la:36.40,lo:129.36},
-                    {n:"의성",la:36.35,lo:128.69}, {n:"봉화",la:36.89,lo:128.73}, {n:"영주",la:36.87,lo:128.51},
-                    {n:"문경",la:36.62,lo:128.14}, {n:"합천",la:35.57,lo:128.17}, {n:"밀양",la:35.49,lo:128.74},
-                    {n:"산청",la:35.41,lo:127.87}, {n:"남해",la:34.82,lo:127.92}, {n:"거제",la:34.88,lo:128.62},
-                    {n:"청송군",la:36.43,lo:129.05},
-                    // 제주
-                    {n:"제주",la:33.51,lo:126.52}, {n:"서귀포",la:33.25,lo:126.56}, {n:"성산",la:33.39,lo:126.88},
-                    {n:"고산",la:33.29,lo:126.16}
-                ];
-
-                let nearest = null;
+                // 2. 가장 가까운 관측소/지역명 찾기 (KOREA_CITIES 전체 대상)
+                let nearestName = "현위치";
                 let minDist = Infinity;
                 
-                // 전체 관측소 중 가장 가까운 곳 탐색
-                ALL_COORD_CITIES.forEach(city => {
-                    const dist = Math.pow(city.la - lat, 2) + Math.pow(city.lo - lon, 2);
+                for(const [name, coords] of Object.entries(KOREA_CITIES)) {
+                    const dist = Math.pow(coords.la - lat, 2) + Math.pow(coords.lo - lon, 2);
                     if(dist < minDist) {
                         minDist = dist;
-                        nearest = city;
-                    }
-                });
-                
-                let weatherInfo = { temp: "--", desc: "정보없음" };
-                if(nearest) {
-                    for(let i=0; i<items.length; i++) {
-                        if(items[i].textContent === nearest.n) {
-                            weatherInfo.temp = items[i].getAttribute("ta");
-                            weatherInfo.desc = items[i].getAttribute("desc");
-                            break;
-                        }
+                        nearestName = name;
                     }
                 }
+
+                // 3. Nominatim으로 상세 주소까지 시도 (실패 시 위 nearestName 사용)
+                let addressDisplay = `${nearestName} 인근`;
+                try {
+                    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14`;
+                    const res = await fetch(url);
+                    if(res.ok) {
+                        const json = await res.json();
+                        const addr = json.address;
+                        // 시 + 구/군/시 + 동 조합
+                        const city = addr.city || addr.province || "";
+                        const sub = addr.county || addr.district || addr.borough || "";
+                        const town = addr.town || addr.village || "";
+                        
+                        if(city || sub) {
+                            addressDisplay = `${city} ${sub} ${town}`.trim();
+                        }
+                    }
+                } catch(e) {}
 
                 let output = `
 <span class="c-y">■ 내 위치 날씨 정보 ■</span>
 
-<span class="c-w">현재 위치(GPS)</span>: 위도 ${lat.toFixed(2)}, 경도 ${lon.toFixed(2)}
-<span class="c-w">인접 관측소</span>  : <span class="c-c">${nearest ? nearest.n : '알수없음'}</span>
+<span class="c-w">현재 위치</span> : <span class="c-c">${addressDisplay}</span>
+<span class="c-g">(GPS: ${lat.toFixed(2)}, ${lon.toFixed(2)})</span>
 
 <span class="c-c">┌──────────────────────────┐</span>
-   기  온 : <span class="c-r" style="font-size:1.5em">${weatherInfo.temp}℃</span>
-   상  태 : <span class="c-w" style="font-size:1.2em">${weatherInfo.desc}</span>
+   기  온 : <span class="c-r" style="font-size:1.5em">${weather.temperature}℃</span>
+   상  태 : <span class="c-w" style="font-size:1.2em">${getWeatherDesc(weather.weathercode)}</span>
 <span class="c-c">└──────────────────────────┘</span>
+   풍  속 : ${weather.windspeed} km/h
 
-<span class="c-g">발표: ${data.year}.${data.month}.${data.day} ${data.hour}:00</span>
-<span class="c-w">[R:새로고침] [30:날씨홈] [M:메인]</span>
+<span class="c-g">Data by Open-Meteo</span>
+<span class="c-w">[R:새로고침] [30:권역목록] [M:메인]</span>
 `;
                 mainView.innerHTML = output;
                 promptText.innerText = "명령(M) >";
+                currentPage = 31;
                 
             } catch(e) {
                 renderError("날씨 데이터 처리 실패");
@@ -620,10 +619,9 @@
         mainView.innerHTML = `
 <span class="c-y">■ 도움말 ■</span>
 
-1. 원하는 메뉴의 번호를 입력 후 Enter를 누르세요.
-2. 모바일에서는 화면의 항목을 터치해도 됩니다.
-3. [31]번 내 위치 날씨는 GPS 권한이 필요합니다.
-4. 연합뉴스(20번대), 날씨(30번대)를 제공합니다.
+1. 30번 메뉴에서 권역을 선택하면 시/군/구 상세 날씨를 볼 수 있습니다.
+2. 31번은 GPS를 사용하여 현재 김천 등 사용자의 정확한 위치 날씨를 보여줍니다.
+3. 기사 번호를 입력하면 내용을 볼 수 있습니다.
 
 <span class="c-g">[M] 메인 메뉴로 돌아가기</span>
 `;
@@ -656,9 +654,10 @@
             window.close();
             return;
         }
-        if(cmd === 'R' && currentPage === 31) {
-            fetchLocalWeather();
-            return;
+        // 'R' 입력 시 새로고침
+        if(cmd === 'R') {
+            if(currentPage === 31) { fetchLocalWeather(); return; }
+            if(currentPage >= 32 && currentPage <= 37) { fetchRegionalWeather(currentPage); return; }
         }
 
         if(currentPage === 'READING') {
